@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "questmod",
+  "version": "${version}",
+  "name": "Quest Mod",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "GPL-3.0",
+  "icon": "assets/questmod/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-datagen": [
+      "local.ytk.questmod.client.QuestModDataGenerator"
+    ],
+    "client": [
+      "local.ytk.questmod.client.QuestModClient"
+    ],
+    "main": [
+      "local.ytk.questmod.QuestMod"
+    ]
+  },
+  "mixins": [
+    "questmod.mixins.json",
+    {
+      "config": "questmod.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
