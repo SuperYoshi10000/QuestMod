@@ -2,51 +2,66 @@ package local.ytk.questmod.quests;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import it.unimi.dsi.fastutil.ints.Int2IntMap;
-import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
-import local.ytk.questmod.QuestMod;
+import it.unimi.dsi.fastutil.ints.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.PersistentState;
 import net.minecraft.world.PersistentStateType;
-import net.minecraft.world.World;
 
 import java.util.*;
 
 public class QuestData extends PersistentState {
+    public static final String QUESTS_DATA_ID = "quests";
     public static final Codec<QuestData> CODEC = NbtCompound.CODEC.xmap(QuestData::fromNbt, QuestData::toNbt);
     private static final PersistentStateType<QuestData> TYPE = new PersistentStateType<>(
-            QuestMod.MOD_ID, QuestData::new, CODEC, null
+            QUESTS_DATA_ID, QuestData::new, CODEC, null
     );
     
-    public final List<QuestInstance> activeQuests = new ArrayList<>();
+    public long lastQuestTick = 0;
+    public int nextQuestId = 1;
+    public final Int2ObjectLinkedOpenHashMap<QuestInstance> activeQuests = new Int2ObjectLinkedOpenHashMap<>();
     public final HashMap<UUID, PlayerQuestData> players = new HashMap<>();
     
-    public PlayerQuestData getPlayerData(UUID uuid) {
-        return players.computeIfAbsent(uuid, PlayerQuestData::new);
+    public static int getNextQuestId(MinecraftServer server) {
+        return getServerState(server).nextQuestId++;
+    }
+    public static Int2ObjectMap<QuestInstance> getActiveQuests(MinecraftServer server) {
+        return getServerState(server).activeQuests;
+    }
+    public static HashMap<UUID, PlayerQuestData> getPlayerData(MinecraftServer server) {
+        return getServerState(server).players;
     }
     
     public NbtCompound writeNbt(NbtCompound nbt) {
-        NbtList questListTag = activeQuests.stream()
-                .map(quest -> QuestInstance.CODEC.encodeStart(NbtOps.INSTANCE, quest))
-                .map(DataResult::result)
-                .flatMap(Optional::stream)
-                .collect(NbtList::new, NbtList::add, NbtList::addAll);
+        NbtCompound questListTag = activeQuests
+                .int2ObjectEntrySet()
+                .stream()
+                .flatMap(questEntry -> QuestInstance.CODEC
+                        .encodeStart(NbtOps.INSTANCE, questEntry.getValue())
+                        .map(e -> Pair.of(Integer.toHexString(questEntry.getIntKey()), e))
+                        .result()
+                        .stream()
+                )
+                .collect(NbtCompound::new,
+                        (m, p) -> m.put(p.getFirst(), p.getSecond()),
+                        (a, b) -> b.forEach(a::put)
+                );
         nbt.put("quests", questListTag);
         
         NbtCompound playerListTag = new NbtCompound();
         for (UUID uuid : players.keySet()) {
             NbtCompound playerTag = new NbtCompound();
-            playerTag.put("quests", getPlayerData(uuid).toNbt());
+            playerTag.put("quests", players.computeIfAbsent(uuid, PlayerQuestData::new).toNbt());
             playerListTag.put(uuid == null ? "PLAYER" : uuid.toString(), playerTag);
         }
         nbt.put("players", playerListTag);
+        
+        nbt.putInt("nextQuestId", nextQuestId);
+        nbt.putLong("lastQuestTick", lastQuestTick);
         return nbt;
     }
     
@@ -56,16 +71,16 @@ public class QuestData extends PersistentState {
     
     public static QuestData fromNbt(NbtCompound nbt) {
         QuestData state = new QuestData();
-        NbtList questListTag = nbt.getListOrEmpty("quests");
-        questListTag.stream()
-                .map(NbtElement::asCompound)
-                .flatMap(Optional::stream)
-                .map(c -> QuestInstance.CODEC.decode(NbtOps.INSTANCE, c))
-                .map(DataResult::result)
-                .flatMap(Optional::stream)
-                .map(Pair::getFirst)
-                .forEach(state.activeQuests::add);
-        
+        NbtCompound questListTag = nbt.getCompoundOrEmpty("quests");
+        for (String key : questListTag.getKeys()) {
+            NbtElement element = questListTag.get(key);
+            if (!(element instanceof NbtCompound compound)) continue;
+            Optional<QuestInstance> quest = QuestInstance.CODEC.decode(NbtOps.INSTANCE, compound)
+                    .map(Pair::getFirst)
+                    .result();
+            if (quest.isEmpty()) continue;
+            state.activeQuests.put(Integer.parseUnsignedInt(key, 16), quest.get());
+        }
         NbtCompound playerListTag = nbt.getCompoundOrEmpty("players");
         for (String key : playerListTag.getKeys()) {
             UUID uuid = key.equals("PLAYER") ? null : UUID.fromString(key);
@@ -73,11 +88,13 @@ public class QuestData extends PersistentState {
             PlayerQuestData playerState = PlayerQuestData.fromNbt(playerTag);
             state.players.put(uuid, playerState);
         }
+        
+        nbt.getInt("nextQuestId").ifPresent(i -> state.nextQuestId = i);
+        nbt.getLong("lastQuestTick").ifPresent(l -> state.lastQuestTick = l);
         return state;
     }
     public static QuestData getServerState(MinecraftServer server) {
-        ServerWorld world = server.getWorld(World.OVERWORLD);
-        assert world != null;
+        ServerWorld world = server.getOverworld();
         QuestData state = world.getPersistentStateManager().getOrCreate(TYPE);
         state.markDirty();
         return state;
@@ -89,10 +106,10 @@ public class QuestData extends PersistentState {
             // Client side
             return new PlayerQuestData(player.getUuid());
         }
-        QuestData state = getServerState(server);
-        PlayerQuestData playerState = state.players.computeIfAbsent(player.getUuid(),
-                uuid -> state.players.computeIfAbsent(null, PlayerQuestData::new));
-        if (server.isSingleplayer()) state.players.put(null, playerState); // null represents the main player in a singleplayer world
+        HashMap<UUID, PlayerQuestData> playerData = getPlayerData(server);
+        PlayerQuestData playerState = playerData.computeIfAbsent(player.getUuid(),
+                uuid -> playerData.computeIfAbsent(null, PlayerQuestData::new));
+        if (server.isSingleplayer()) playerData.put(null, playerState); // null represents the main player in a singleplayer world
         return playerState;
     }
     

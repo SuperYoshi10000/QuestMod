@@ -1,0 +1,178 @@
+{
+  "name": "Default Quests",
+  "weight": 1000,
+  "types": {
+    "xp": {
+      "value": 1
+    },
+    "level": {
+      "base": -5,
+      "value": 15
+    },
+    "totalKillCount": {
+      "value": 5
+    },
+    "minecraft:custom": {
+      "type": "custom_stat",
+      "values": {
+        "minecraft:mob_kills": { "value": 10 },
+        "minecraft:player_kills": { "base": -10, "value": 30, "pvp": true },
+        "minecraft:deaths": { "base": 10, "value": 20, "death": true }
+      }
+    },
+    "minecraft:used": {
+      "type": "item",
+      "default": 1,
+      "overrides": {
+        "minecraft:totem_of_undying": { "base": 5, "value": 15 }
+      },
+      "internal": true
+    },
+    "minecraft:killed": {
+      "type": "entity_type",
+      "default": 10,
+      "overrides": {
+        "minecraft:allay": { "base": 5 },
+        "minecraft:armadillo": { "base": 5, "value": 5 },
+        "minecraft:axolotl": { "base": 5, "value": 5 },
+        "minecraft:camel": { "base": 5, "value": 5 },
+        "minecraft:cat": { "base": 5, "value": 5 },
+        "minecraft:chicken": { "value": 5 },
+        "minecraft:cod": { "value": 5 },
+        "minecraft:cow": { "value": 5 },
+        "minecraft:donkey": { "value": 5 },
+        "minecraft:frog": { "value": 5 },
+        "minecraft:glow_squid": { "value": 5 },
+        "minecraft:happy_ghast": { "value": 5 },
+        "minecraft:horse": { "value": 5 },
+        "minecraft:mooshroom": { "base": 15, "value": 10 },
+        "minecraft:mule": { "value": 5 },
+        "minecraft:ocelot": { "value": 5 },
+        "minecraft:parrot": { "value": 5 },
+        "minecraft:pig": { "value": 5 },
+        "minecraft:pufferfish": { "value": 5 },
+        "minecraft:rabbit": { "value": 5 },
+        "minecraft:salmon": { "value": 5 },
+        "minecraft:sheep": { "value": 5 },
+        "minecraft:skeleton_horse": { "base": 5 },
+        "minecraft:snow_golem": { "base": 5, "value": 5 },
+        "minecraft:squid": { "value": 5 },
+        "minecraft:tadpole": { "base": 5, "value": 5 },
+        "minecraft:tropical_fish": { "base": 5, "value": 5 },
+        "minecraft:turtle": { "base": 5, "value": 5 },
+        "minecraft:villager": { "value": 5 },
+        "minecraft:wandering_trader": { "value": 5 },
+        
+        "minecraft:bogged": { "base": 5 },
+        "minecraft:breeze": { "base": 20 },
+        "minecraft:cave_spider": { "base": 10 },
+        "minecraft:dolphin": { "base": 10, "value": 5 },
+        "minecraft:elder_guardian": { "base": 10 },
+        "minecraft:ender_dragon": { "base": 15 },
+        "minecraft:evoker": { "base": 10 },
+        "minecraft:goat": { "base": 10, "value": 5 },
+        "minecraft:guardian": { "base": 10 },
+        "minecraft:iron_golem": { "value": 50 },
+        "minecraft:llama": { "base": 10, "value": 5 },
+        "minecraft:panda": { "base": 10, "value": 5 },
+        "minecraft:phantom": { "base": 5 },
+        "minecraft:polar_bear": { "base": 10 },
+        "minecraft:pillager": { "base": 10 },
+        "minecraft:shulker": { "base": 10 },
+        "minecraft:stray": { "base": 10 },
+        "minecraft:trader_llama": { "base": 20, "value": 5 },
+        "minecraft:vindicator": { "base": 10 },
+        "minecraft:warden": { "base": 20, "value": 200 },
+        "minecraft:witch": { "base": 10 },
+        "minecraft:wither": { "base": 10 },
+        "minecraft:zoglin": { "base": 10 },
+        
+        "minecraft:giant": { "exclude": true },
+        "minecraft:illusioner": { "exclude": true },
+        "minecraft:zombie_horse": { "exclude": true }
+      }
+    },
+    "minecraft:killed_by": {
+      "type": "entity_type",
+      "default": 10,
+      "death": true,
+      "overrides": {
+        "minecraft:bogged": { "base": 5 },
+        "minecraft:breeze": { "base": 20 },
+        "minecraft:cave_spider": { "base": 10 },
+        "minecraft:dolphin": { "base": 10 },
+        "minecraft:elder_guardian": { "base": 10 },
+        "minecraft:ender_dragon": { "base": 15 },
+        "minecraft:evoker": { "base": 10 },
+        "minecraft:goat": { "base": 10, "value": 20 },
+        "minecraft:guardian": { "base": 10 },
+        "minecraft:llama": { "base": 10, "value": 20 },
+        "minecraft:panda": { "base": 10 },
+        "minecraft:phantom": { "base": 5 },
+        "minecraft:polar_bear": { "base": 10 },
+        "minecraft:pillager": { "base": 10 },
+        "minecraft:shulker": { "base": 10 },
+        "minecraft:stray": { "base": 10 },
+        "minecraft:trader_llama": { "base": 20, "value": 20 },
+        "minecraft:vindicator": { "base": 10 },
+        "minecraft:warden": { "base": 20, "value": 20 },
+        "minecraft:witch": { "base": 10 },
+        "minecraft:wither": { "base": 10 },
+        "minecraft:zoglin": { "base": 10 },
+        
+        "minecraft:giant": { "exclude": true },
+        "minecraft:illusioner": { "exclude": true },
+        "minecraft:zombie_horse": { "exclude": true }
+      }
+    },
+    "*mined": {
+      "noTool": 1,
+      "wood": 2,
+      "stone": 4,
+      "iron": 6,
+      "diamond": 10,
+      "value": 1,
+      "hardnessMultiplier": 0.1
+    },
+    "*crafted": {
+      "commonBase": 0,
+      "common": 1,
+      "uncommonBase": 1,
+      "uncommon": 3,
+      "rareBase": 2,
+      "rare": 6,
+      "epicBase": 3,
+      "epic": 10
+    }
+  },
+  "rewards": [
+    { "id": "minecraft:redstone_dust", "value": 40 },
+    { "id": "minecraft:lapis_lazuli", "value": 40 },
+    { "id": "minecraft:copper_ingot", "value": 50 },
+    { "id": "minecraft:iron_ingot", "value": 60 },
+    { "id": "minecraft:gold_ingot", "value": 80 },
+    { "id": "minecraft:diamond", "value": 120 },
+    { "id": "minecraft:netherite_ingot", "value": 200 }
+  ],
+  "config": {
+    "min": 100,
+    "min_time_mod": 0.01,
+    "min_limit": 640,
+    "mid": 500,
+    "mid_time_mod": 0.1,
+    "mid_limit": 30720,
+    "max": 1000,
+    "max_time_mod": 0.2,
+    "max_limit": 40960
+  },
+  "targetConfig": {
+    "prioritize_closer": false,
+    "threshold": 0.1
+  },
+  "rewardConfig": {
+    "xp_multiplier": 1.0,
+    "max_count": 64,
+    "max_shrink": 0.25,
+    "max_xp_ratio": 0.5
+  }
+}
