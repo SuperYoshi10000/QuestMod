@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.gamerule.v1.GameRuleRegistry;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
@@ -43,6 +44,10 @@ public class QuestMod implements ModInitializer {
     public static final GameRules.Key<GameRules.IntRule> NEW_QUEST_DELAY
             = GameRuleRegistry.register("newQuestDelay", GameRules.Category.MISC, GameRuleFactory.createIntRule(1200));
     public static final TagKey<Item> QUEST_ITEM_TARGET = TagKey.of(RegistryKeys.ITEM, id("quest_item_target"));
+    public static final TagKey<Item> UNCRAFTABLE = TagKey.of(RegistryKeys.ITEM, id("uncraftable"));
+    public static final TagKey<Item> KNOWN_CRAFTABLE = TagKey.of(RegistryKeys.ITEM, id("known_craftable"));
+    public static final TagKey<Item> CREATIVE_ONLY_ITEM = TagKey.of(RegistryKeys.ITEM, id("creative_only"));
+    public static final TagKey<Block> CREATIVE_ONLY_BLOCK = TagKey.of(RegistryKeys.BLOCK, id("creative_only"));
     
     public static final QuestLoader QUEST_LOADER = new QuestLoader();
     private static final Logger LOGGER = LoggerFactory.getLogger(QuestMod.class);

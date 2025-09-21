@@ -89,8 +89,8 @@ public class QuestLoader implements SimpleSynchronousResourceReloadListener {
     }
     
     private static void loadDefaults(QuestList questList, JsonObject types, JsonObject json) {
-        createBlockList(questList, Stats.MINED);
-        createItemList(questList, Stats.CRAFTED);
+        createBlockList(questList, Stats.MINED, QuestList.BlockTarget::isMineable);
+        createItemList(questList, Stats.CRAFTED, QuestList.ItemTarget::isCraftable);
         createItemList(questList, Stats.USED, QuestList.ItemTarget::isUsable);
         
         JsonObject killed = types.getAsJsonObject("minecraft:killed");

@@ -10,22 +10,27 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.consume.UseAction;
+import net.minecraft.recipe.*;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.scoreboard.ScoreboardCriterion;
+import net.minecraft.screen.CraftingScreenHandler;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.StatType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Random;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class QuestList {
     public static final int DEFAULT_WEIGHT = 1000;
     public final Identifier id;
     int weight;
+    static Set<Item> craftableItems;
     List<Target<?>> targets = new ArrayList<>();
     List<Reward> rewards = new ArrayList<>();
     BlockModifiers blockModifiers;
@@ -38,6 +43,25 @@ public class QuestList {
     public QuestList(Identifier id, int weight) {
         this.id = id;
         this.weight = weight;
+    }
+    
+    static void initCraftableItems(MinecraftServer server) {
+        craftableItems = Stream.concat(
+                server.getRecipeManager()
+                        .values()
+                        .stream()
+                        .map(RecipeEntry::value)
+                        .map(recipe ->
+                                recipe instanceof ShapedRecipe
+                                || recipe instanceof ShapelessRecipe
+                                || recipe instanceof SingleStackRecipe
+                                || recipe instanceof SmithingRecipe
+                                ? recipe.craft(null, null)
+                                : null
+                        )
+                        .flatMap(Stream::ofNullable).map(ItemStack::getItem),
+                Registries.ITEM.stream().filter(item -> item.getDefaultStack().isIn(QuestMod.KNOWN_CRAFTABLE))
+        ).collect(Collectors.toSet());
     }
     
     public void addTarget(Target<?> target) {
@@ -100,9 +124,18 @@ public class QuestList {
             BlockModifiers modifiers = list.blockModifiers;
             return modifiers.value + (int) Math.ceil(statValue.getHardness() * modifiers.hardnessMultiplier);
         }
+        static boolean isMineable(Block block) {
+            BlockState state = block.getDefaultState();
+            return !state.isIn(QuestMod.CREATIVE_ONLY_BLOCK)
+                    && block.getHardness() >= 0
+                    && !state.getFluidState().isEmpty();
+        }
         
     }
     public record ItemTarget(QuestList list, StatType<Item> statType, Item statValue) implements Target<Item> {
+        static boolean isCraftable(Item item) {
+            return craftableItems.contains(item);
+        }
         static boolean isUsable(Item item) {
             ItemStack stack = item.getDefaultStack();
             return stack.isDamageable()

@@ -1,6 +1,8 @@
 # Quest Mod
 This mod adds quests to Minecraft. Anyone in a world or on a server is able to complete them.
 
+This mod is required on the server. It is not required on the client, though this has not been tested and it is more convenient to have it on both sides.
+
 ## Quests
 The quest targets and rewards are randomly generated, and they get harder the longer the world has been played. There are many possible quests.
 

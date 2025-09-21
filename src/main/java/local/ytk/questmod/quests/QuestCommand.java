@@ -2,8 +2,11 @@ package local.ytk.questmod.quests;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandExceptionType;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.server.command.*;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -86,6 +89,9 @@ public class QuestCommand {
     
     private static int create(CommandContext<ServerCommandSource> context) {
         boolean success = createQuest(context.getSource().getServer());
+        Int2ObjectLinkedOpenHashMap<QuestInstance> activeQuests = QuestData.getServerState(context.getSource().getServer()).activeQuests;
+        QuestInstance quest = activeQuests.lastEntry().getValue();
+        context.getSource().sendFeedback(() -> Text.translatable("commands.quest.create", getQuestName(quest)), false);
         return success ? SINGLE_SUCCESS : 0;
     }
     
@@ -113,8 +119,13 @@ public class QuestCommand {
         context.getSource().sendFeedback(() -> text, false);
     }
     
-    private static int check(CommandContext<ServerCommandSource> context) {
+    private static int check(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         int completable = 0;
+        try {
+            context.getArgument("player", ServerPlayerEntity.class);
+        } catch (IllegalArgumentException e) {
+            context.getSource().getPlayerOrThrow();
+        }
         try {
             int id = context.getArgument("id", Integer.class);
             completable = check(context, id) ? 1 : 0;
@@ -123,7 +134,7 @@ public class QuestCommand {
         }
         return completable;
     }
-    private static boolean check(CommandContext<ServerCommandSource> context, int id) {
+    private static boolean check(CommandContext<ServerCommandSource> context, int id) throws CommandSyntaxException {
         QuestInstance quest = getActiveQuests(context).get(id);
         if (quest == null) {
             context.getSource().sendError(Text.translatable("commands.quest.error", id));
@@ -133,16 +144,20 @@ public class QuestCommand {
         try {
             player = context.getArgument("player", ServerPlayerEntity.class);
         } catch (IllegalArgumentException e) {
-            player = context.getSource().getPlayer();
+            player = context.getSource().getPlayerOrThrow();
         }
-        assert player != null;
         boolean canComplete = checkQuest(player, id);
         MutableText text = Text.translatable("commands.quest.check." + canComplete, player.getName(), getQuestName(quest));
         context.getSource().sendFeedback(() -> text, false);
         return canComplete;
     }
     
-    private static int claim(CommandContext<ServerCommandSource> context) {
+    private static int claim(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        try {
+            context.getArgument("player", ServerPlayerEntity.class);
+        } catch (IllegalArgumentException e) {
+            context.getSource().getPlayerOrThrow();
+        }
         int completed = 0;
         try {
             int id = context.getArgument("id", Integer.class);
@@ -152,7 +167,7 @@ public class QuestCommand {
         }
         return completed;
     }
-    private static boolean claim(CommandContext<ServerCommandSource> context, int id) {
+    private static boolean claim(CommandContext<ServerCommandSource> context, int id) throws CommandSyntaxException {
         QuestInstance quest = getActiveQuests(context).get(id);
         if (quest == null) {
             context.getSource().sendError(Text.translatable("commands.quest.error", id));
@@ -162,14 +177,16 @@ public class QuestCommand {
         try {
             player = context.getArgument("player", ServerPlayerEntity.class);
         } catch (IllegalArgumentException e) {
-            player = context.getSource().getPlayer();
+            player = context.getSource().getPlayerOrThrow();
         }
         boolean check = true;
         try {
             check = context.getArgument("check", Boolean.class);
         } catch (IllegalArgumentException ignored) {}
-        assert player != null;
-        return completeQuest(player, id, !check);
+        boolean wasClaimed = completeQuest(player, id, !check);
+        MutableText text = Text.translatable("commands.quest.claim." + wasClaimed, player.getName(), getQuestName(quest));
+        context.getSource().sendFeedback(() -> text, false);
+        return wasClaimed;
     }
     
     private static int remove(CommandContext<ServerCommandSource> context) {
@@ -182,17 +199,13 @@ public class QuestCommand {
         return SINGLE_SUCCESS;
     }
     private static int clear(CommandContext<ServerCommandSource> context) {
-        
         getActiveQuests(context).clear();
+        context.getSource().sendFeedback(() -> Text.translatable("commands.quest.clear"), true);
         return SINGLE_SUCCESS;
     }
     
-    private static int menu(CommandContext<ServerCommandSource> context) {
-        ServerPlayerEntity player = context.getSource().getPlayer();
-        if (player == null) {
-            context.getSource().sendError(Text.translatable("commands.quest.error.no_player"));
-            return 0;
-        }
+    private static int menu(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
         updateQuests(player);
         return SINGLE_SUCCESS;
     }
