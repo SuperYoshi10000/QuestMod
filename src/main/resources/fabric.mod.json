@@ -7,7 +7,7 @@
   "authors": [],
   "contact": {},
   "license": "GPL-3.0",
-  "icon": "assets/questmod/icon.png",
+  "icon": "assets/questmod/icon_256.png",
   "environment": "*",
   "entrypoints": {
     "fabric-datagen": [

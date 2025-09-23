@@ -74,7 +74,7 @@ public class QuestMaker {
         int value = getValue(time);
         
         Random random = server.getOverworld().getRandomSequences().getOrCreate(ID);
-        if (QUEST_LOADER.questLists.isEmpty()) return null;
+        if (QUEST_LOADER.questLists == null || QUEST_LOADER.questLists.isEmpty()) return null;
         QuestList list = QuestList.select(QUEST_LOADER.questLists.values(), random);
         if (list == null || list.targets.isEmpty() || list.rewards.isEmpty()) return null;
         

@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import local.ytk.questmod.quests.*;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleFactory;
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleRegistry;
@@ -54,7 +55,11 @@ public class QuestMod implements ModInitializer {
     
     @Override
     public void onInitialize() {
-        ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(QUEST_LOADER);
+        ServerLifecycleEvents.SERVER_STARTING.register(QuestList::initCraftableItemsIfNeeded);
+        ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, resourceManager) -> {
+            QuestList.initCraftableItemsIfNeeded(server);
+            QUEST_LOADER.reload(resourceManager);
+        });
         
         CommandRegistrationCallback.EVENT.register((dispatcher, access, env) -> {
             QuestCommand.register(dispatcher);
@@ -92,6 +97,8 @@ public class QuestMod implements ModInitializer {
     }
     
     public static boolean createQuest(MinecraftServer server) {
+        if (QUEST_LOADER.questLists() == null) QUEST_LOADER.reload(server.getResourceManager());
+        QuestList.initCraftableItemsIfNeeded(server);
         QuestInstance quest = QUEST_LOADER.questMaker.createNewQuest(server);
         if (quest == null) return false;
         createQuestScore(server, quest);

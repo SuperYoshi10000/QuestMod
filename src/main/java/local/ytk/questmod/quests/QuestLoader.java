@@ -102,7 +102,7 @@ public class QuestLoader implements SimpleSynchronousResourceReloadListener {
         if (killedBy != null) createEntityList(questList, Stats.KILLED_BY,
                 getJsonInt(killedBy, "defaultBase", 0),
                 getJsonInt(killedBy, "default", 0),
-                killedBy.getAsJsonObject("overrides"));
+                killedBy.getAsJsonObject("overrides"), QuestList.EntityTarget::canAttackPlayer);
     }
     
     private static void loadQuestTypes(QuestList list, JsonObject json) {
@@ -210,6 +210,9 @@ public class QuestLoader implements SimpleSynchronousResourceReloadListener {
         createList(list, statType, QuestList.ItemTarget::new, filter);
     }
     public static void createEntityList(QuestList list, StatType<EntityType<?>> statType, int defaultBase, int defaultValue, JsonObject overrides) {
+        createEntityList(list, statType, defaultBase, defaultValue, overrides, null);
+    }
+    public static void createEntityList(QuestList list, StatType<EntityType<?>> statType, int defaultBase, int defaultValue, JsonObject overrides, Predicate<EntityType<?>> filter) {
         createList(list, statType, (l, t, v) -> {
             Identifier id = QuestList.TargetFactory.getId(t, v);
             int base = defaultBase;
@@ -220,7 +223,7 @@ public class QuestLoader implements SimpleSynchronousResourceReloadListener {
                 if (overrides.get("value") instanceof JsonPrimitive p && p.isNumber()) value = p.getAsInt();
             }
             return new QuestList.EntityTarget(l, t, v, base, value);
-        });
+        }, filter);
     }
     
     public static <T> void createList(QuestList list, StatType<T> statType, QuestList.TargetFactory<T> factory) {

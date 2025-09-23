@@ -90,7 +90,7 @@ public class QuestCommand {
     private static int create(CommandContext<ServerCommandSource> context) {
         boolean success = createQuest(context.getSource().getServer());
         Int2ObjectLinkedOpenHashMap<QuestInstance> activeQuests = QuestData.getServerState(context.getSource().getServer()).activeQuests;
-        QuestInstance quest = activeQuests.lastEntry().getValue();
+        QuestInstance quest = activeQuests.get(activeQuests.lastIntKey());
         context.getSource().sendFeedback(() -> Text.translatable("commands.quest.create", getQuestName(quest)), false);
         return success ? SINGLE_SUCCESS : 0;
     }

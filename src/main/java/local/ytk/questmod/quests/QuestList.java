@@ -14,8 +14,6 @@ import net.minecraft.recipe.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.scoreboard.ScoreboardCriterion;
-import net.minecraft.screen.CraftingScreenHandler;
-import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.StatType;
@@ -45,20 +43,24 @@ public class QuestList {
         this.weight = weight;
     }
     
+    public static void initCraftableItemsIfNeeded(MinecraftServer server) {
+        if (craftableItems == null) {
+            initCraftableItems(server);
+        }
+    }
     static void initCraftableItems(MinecraftServer server) {
         craftableItems = Stream.concat(
                 server.getRecipeManager()
                         .values()
                         .stream()
                         .map(RecipeEntry::value)
-                        .map(recipe ->
-                                recipe instanceof ShapedRecipe
-                                || recipe instanceof ShapelessRecipe
-                                || recipe instanceof SingleStackRecipe
-                                || recipe instanceof SmithingRecipe
-                                ? recipe.craft(null, null)
-                                : null
-                        )
+                        .map(recipe -> {
+                            try {
+                                return recipe.craft(null, null);
+                            } catch (Exception e) {
+                                return null;
+                            }
+                        })
                         .flatMap(Stream::ofNullable).map(ItemStack::getItem),
                 Registries.ITEM.stream().filter(item -> item.getDefaultStack().isIn(QuestMod.KNOWN_CRAFTABLE))
         ).collect(Collectors.toSet());
@@ -173,6 +175,10 @@ public class QuestList {
         }
     }
     public record EntityTarget(QuestList list, StatType<EntityType<?>> statType, EntityType<?> statValue, int base, int value) implements Target<net.minecraft.entity.EntityType<?>> {
+        static boolean canAttackPlayer(EntityType<?> entityType) {
+            // TODO check if entity can attack
+            return true;
+        }
         @SuppressWarnings("unchecked")
         public <T extends Entity> EntityType<T> castValue() {
             return (EntityType<T>) statValue;
