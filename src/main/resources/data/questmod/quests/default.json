@@ -146,24 +146,24 @@
     }
   },
   "rewards": [
-    { "id": "minecraft:redstone_dust", "value": 40 },
-    { "id": "minecraft:lapis_lazuli", "value": 40 },
-    { "id": "minecraft:copper_ingot", "value": 50 },
-    { "id": "minecraft:iron_ingot", "value": 60 },
-    { "id": "minecraft:gold_ingot", "value": 80 },
-    { "id": "minecraft:diamond", "value": 120 },
+    { "id": "minecraft:redstone_dust", "value": 10 },
+    { "id": "minecraft:lapis_lazuli", "value": 10 },
+    { "id": "minecraft:copper_ingot", "value": 12 },
+    { "id": "minecraft:iron_ingot", "value": 15 },
+    { "id": "minecraft:gold_ingot", "value": 25 },
+    { "id": "minecraft:diamond", "value": 40 },
     { "id": "minecraft:netherite_ingot", "value": 200 }
   ],
   "config": {
     "min": 100,
     "min_time_mod": 0.01,
-    "min_limit": 640,
+    "min_limit": 128,
     "mid": 500,
     "mid_time_mod": 0.1,
-    "mid_limit": 30720,
+    "mid_limit": 2560,
     "max": 1000,
     "max_time_mod": 0.2,
-    "max_limit": 40960
+    "max_limit": 12800
   },
   "targetConfig": {
     "prioritize_closer": false,
