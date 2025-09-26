@@ -13,7 +13,7 @@ You can also click "claim all" to claim all quests that you have completed.
 ## Customization
 Quests and quest lists can be customized with data packs. Every quest is based on a stat or other scoreboard criterion.
 
-To customize quests, create a data pack quest lists in the directory `data/<namespace>/quests/`. For more information, see [DATAPACK.md](DATAPACK.md)
+To customize quests, create a data pack quest lists in the directory `data/<namespace>/quests/`. For more information, see [DATAPACK.md](DATAPACK.md).
 
 ## License
 This mod uses the GPL 3.0 license, or any later version. You can distribute the mod and use it in modpacks, or make your own version, as long as it is open source and uses the same license.
