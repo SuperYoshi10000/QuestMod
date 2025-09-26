@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 
 public class QuestListEntry extends ElementListWidget.Entry<QuestListEntry> {
     final MinecraftClient client = MinecraftClient.getInstance();
+    final QuestListWidget container;
     final TextRenderer textRenderer = client.textRenderer;
     final ButtonWidget claimButton;
     final List<Selectable> buttons;
@@ -42,7 +43,9 @@ public class QuestListEntry extends ElementListWidget.Entry<QuestListEntry> {
     int currentX;
     int currentY;
     
-    public QuestListEntry(QuestStatus quest) {
+    public QuestListEntry(QuestStatus quest, QuestListWidget container) {
+        this.container = container;
+        
         claimButton = new QuestClaimButtonWidget(140, 4, 50, 20, quest.progress() >= 1f);
         
         rewardSlot = new Slot(null, 0, 0, 0) {
@@ -113,7 +116,9 @@ public class QuestListEntry extends ElementListWidget.Entry<QuestListEntry> {
     }
     
     public void claim(ButtonWidget buttonWidget) {
+        if (!buttonWidget.active) return; // Incomplete
         QuestModClient.claimQuest(questId);
+        container.removeEntry(this); // Remove entry from list
     }
     
     private class QuestClaimButtonWidget extends ButtonWidget {

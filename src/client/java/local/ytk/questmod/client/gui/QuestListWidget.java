@@ -14,8 +14,13 @@ public class QuestListWidget extends ElementListWidget<QuestListEntry> {
         super(minecraftClient, width, height, y, itemHeight);
         this.quests = quests;
         quests.forEach(quest -> {
-            QuestListEntry entry = new QuestListEntry(quest);
+            QuestListEntry entry = new QuestListEntry(quest, this);
             addEntry(entry);
         });
+    }
+    
+    @Override
+    public boolean removeEntry(QuestListEntry entry) {
+        return super.removeEntry(entry);
     }
 }
